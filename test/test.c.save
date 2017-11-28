@@ -1,0 +1,70 @@
+/*
+ * test.c
+ * 
+ * Copyright 2017  <pi@raspberrypi>
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ * 
+ * 
+ */
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <wiringPi.h>
+
+
+
+#define TRIG 23	
+#define ECHO 24
+
+void setup() {
+        wiringPiSetup();
+        pinMode(TRIG, OUTPUT);
+        pinMode(ECHO, INPUT);
+
+        //TRIG pin must start LOW
+        digitalWrite(TRIG, LOW);
+        delay(30);
+}
+
+int getCM() {
+        //Send trig pulse
+        digitalWrite(TRIG, HIGH);
+        delayMicroseconds(20);
+        digitalWrite(TRIG, LOW);
+
+        //Wait for echo start
+        while(digitalRead(ECHO) == LOW);
+
+        //Wait for echo end
+        long startTime = micros();
+        while(digitalRead(ECHO) == HIGH);
+        long travelTime = micros() - startTime;
+
+        //Get distance in cm
+        int distance = travelTime / 58;
+
+        return distance;
+}
+
+int main(void) {
+        setup();
+
+        printf("Distance: %dcm\n", getCM());
+
+        return 0;
+}
